@@ -49,6 +49,9 @@ public class PServlet extends HttpServlet {
 			String outputformat = "audio/wav";
 			InputStream speech = service1.synthesize(translate,Voice.ES_ENRIQUE,outputformat);
 			
+			response.setContentType("audio/wav");
+			response.setHeader("Content-disposition","filename=output.wav");
+			
 			OutputStream output = response.getOutputStream();
 			byte[] buf = new byte[2046];
 			int len;
@@ -60,8 +63,6 @@ public class PServlet extends HttpServlet {
 			os.flush();
 			os.close();
 			
-			response.setContentType("audio/wav");
-			response.setHeader("Content-disposition","filename="+translate+".wav");
 			//upfile = Payloads.create(speech);
 			//if (!(upfile == null)){
 			//	conn.uploadFile("sample", "output["+translate+"].wav", upfile);
