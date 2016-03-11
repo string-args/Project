@@ -55,7 +55,7 @@ public class PServlet extends HttpServlet {
 				output.write(buf,0,len);
 			}
 			response.setContentType("audio/wav");
-			response.setHeader("Content-disposition","attachment;filename=output.wav");
+			response.setHeader("Content-disposition","filename=output.wav");
 			OutputStream os = output;
 			os.flush();
 			os.close();
