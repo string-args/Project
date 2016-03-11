@@ -61,7 +61,7 @@ public class PServlet extends HttpServlet {
 					List<Column> columns = new ArrayList<Column>();
 					problem.setColumns(columns);
 					
-					JSONObject column_names = (JSONObject) ((JSONArray) result.get("columns")).get(0);
+					JSONArray column_names = (JSONArray) result.get("columns");
 					request.setAttribute("result",column_names.toString());
 				}
 			}
