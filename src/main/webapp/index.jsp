@@ -13,6 +13,10 @@
 			<input type="text" name="input">
 			<input type="submit" value="submit">
 		</form>
-
+		<%
+			if (request.getAttribute("result") != null){
+				out.println("<h1>"+request.getAttribute("result")+"</h1>);
+			}
+		%>
 	<body>
 <html>
