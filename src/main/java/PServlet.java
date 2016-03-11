@@ -27,8 +27,14 @@ public class PServlet extends HttpServlet {
 			JSONParser parser = new JSONParser();
 			JSONObject a = (JSONObject) parser.parse(result.toString());
 			JSONArray o = (JSONArray) a.get("translations");
-		
-			request.setAttribute("result",o.toString());
+			
+			for (Object c : o ){
+				JSONObject p = (JSONObject) c;
+				
+				String translate = (String) p.get("translation");		
+				request.setAttribute("result",o.toString());
+			}
+
 		} catch (Exception e){
 			e.printStackTrace(System.err);
 		}
