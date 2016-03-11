@@ -10,68 +10,69 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject; 
 import org.json.simple.parser.JSONParser; 
 
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Scanner;
+
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.InputStreamReader;
 
-import com.ibm.watson.developer_cloud.language_translation.v2.LanguageTranslation;
-import com.ibm.watson.developer_cloud.language_translation.v2.model.TranslationResult;
-import com.ibm.watson.developer_cloud.text_to_speech.v1.TextToSpeech;
-import com.ibm.watson.developer_cloud.text_to_speech.v1.model.Voice;
+import com.ibm.watson.developer_cloud.tradeoff_analytics.v1.TradeoffAnalytics;
+import com.ibm.watson.developer_cloud.tradeoff_analytics.v1.model.Dilemma;
+import com.ibm.watson.developer_cloud.tradeoff_analytics.v1.model.Problem;
+import com.ibm.watson.developer_cloud.tradeoff_analytics.v1.model.Option;
+import com.ibm.watson.developer_cloud.tradeoff_analytics.v1.model.column.Column;
 
+
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 @WebServlet(name = "PServlet", urlPatterns = {"/PServlet"})
 public class PServlet extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
+	
 		Connector conn = new Connector();
-		LanguageTranslation service = new LanguageTranslation();
+	
+		TradeoffAnalytics service = new TradeoffAnalytics();
+		service.setUsernameAndPassword(conn.get_tradeoff_username(),conn.get_tradeoff_password());
 		
-		service.setUsernameAndPassword(conn.get_language_username(),conn.get_language_password());
-		TranslationResult result = service.translate(request.getParameter("input"),"en","es");
-		
-		TextToSpeech service1 = new TextToSpeech();
-		service1.setUsernameAndPassword(conn.get_t2s_username(),conn.get_t2s_password());
-		
-		String translate = null;
 		try{
-			JSONParser parser = new JSONParser();
-			JSONObject a = (JSONObject) parser.parse(result.toString());
-			JSONArray o = (JSONArray) a.get("translations");
-			
-			for (Object c : o ){
-				JSONObject p = (JSONObject) c;
-				
-				translate = (String) p.get("translation");		
-				break;
+			List<FileItem> items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(request);
+			for (FileItem item: items) {
+				if (!item.isFormField()){
+					Scanner scn = new Scanner(new InputStreamReader(item.getInputStream(),"UTF-8"));
+					List<String> output = new ArrayList<String>();
+					while (scn.hasNextLine()){
+						String line = scn.nextLine().trim();
+						if (line.length() > 0){
+							output.add(line);
+						}
+					}
+					scn.close();
+					
+					//parse the output
+					JSONParser parser = new JSONParser();
+					JSONObject result = (JSONObject) parser.parse(output.toString());
+					
+					Problem problem = new Problem((String) result.get("subject"));
+					
+					List<Column> columns = new ArrayList<Column>();
+					problem.setColumns(columns);
+					
+					JSONObject column_names = (JSONObject) ((JSONArray) result.get("columns")).get(0);
+					request.setAttribute("result",column_names.toString());
+				}
 			}
 			
-			String outputformat = "audio/wav";
-			InputStream speech = service1.synthesize(translate,Voice.ES_ENRIQUE,outputformat);
-
-			OutputStream output = response.getOutputStream();
-			byte[] buf = new byte[2046];
-			int len;
-			while ((len = speech.read(buf)) > 0){
-				output.write(buf,0,len);
-			}
-
-			OutputStream os = output;
-			os.flush();
-			os.close();
-						
-			response.setContentType("audio/wav");
-			response.setHeader("Content-disposition","filename=output.wav");
-			
-			//upfile = Payloads.create(speech);
-			//if (!(upfile == null)){
-			//	conn.uploadFile("sample", "output["+translate+"].wav", upfile);
-			//}
-			//os.flush();
-			//os.close();
-		} catch (Exception e){
+		}catch(Exception e){
 			e.printStackTrace(System.err);
 		}
+		
+		
+	
+	
 		response.setContentType("text/html");
 		response.setStatus(200); 
  		request.getRequestDispatcher("index.jsp").forward(request,response); 
