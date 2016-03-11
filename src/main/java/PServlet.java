@@ -10,23 +10,12 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject; 
 import org.json.simple.parser.JSONParser; 
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Scanner;
+import com.ibm.watson.developer_cloud.language_translation.v2.LanguageTranslation;
+import com.ibm.watson.developer_cloud.language_translation.v2.model.TranslationResult;
+import com.ibm.watson.developer_cloud.text_to_speech.v1.TextToSpeech;
+import com.ibm.watson.developer_cloud.text_to_speech.v1.model.Voice;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
-
-import com.ibm.watson.developer_cloud.tradeoff_analytics.v1.TradeoffAnalytics;
-import com.ibm.watson.developer_cloud.tradeoff_analytics.v1.model.Dilemma;
-import com.ibm.watson.developer_cloud.tradeoff_analytics.v1.model.Problem;
-import com.ibm.watson.developer_cloud.tradeoff_analytics.v1.model.Option;
-import com.ibm.watson.developer_cloud.tradeoff_analytics.v1.model.column.Column;
-
-
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 @WebServlet(name = "PServlet", urlPatterns = {"/PServlet"})
 public class PServlet extends HttpServlet {
@@ -34,44 +23,22 @@ public class PServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
 	
 		Connector conn = new Connector();
-	
-		TradeoffAnalytics service = new TradeoffAnalytics();
-		service.setUsernameAndPassword(conn.get_tradeoff_username(),conn.get_tradeoff_password());
+
+		LanguageTranslation service = new LanguageTranslation();
+		service.setUsernameAndPassword(conn.get_language_username(),conn.get_language_password());
+		
+		TextToSpeech service1 = new TextToSpeech();
+		service1.setUsernameAndPassword(conn.get_t2s_username(),conn.get_t2s_password());
+		
+		TranslationResult result = service.translate((String) request.getParameter("input"),"en","es");
 		
 		try{
-			List<FileItem> items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(request);
-			for (FileItem item: items) {
-				if (!item.isFormField()){
-					Scanner scn = new Scanner(new InputStreamReader(item.getInputStream(),"UTF-8"));
-					List<String> output = new ArrayList<String>();
-					while (scn.hasNextLine()){
-						String line = scn.nextLine().trim();
-						if (line.length() > 0){
-							output.add(line);
-						}
-					}
-					scn.close();
-					
-					//parse the output
-					JSONParser parser = new JSONParser();
-					JSONObject result = (JSONObject) parser.parse(output.toString());
-					
-					Problem problem = new Problem((String) result.get("subject"));
-					
-					List<Column> columns = new ArrayList<Column>();
-					problem.setColumns(columns);
-					
-					JSONArray column_names = (JSONArray) result.get("columns");
-					request.setAttribute("result",column_names.toString());
-				}
-			}
-			
+			JSONParser parser = new JSONParser();
+			JSONObject object = (JSONObject) parser.parse(result.toString());
+			request.setAttribute("result",result.toString());
 		}catch(Exception e){
 			e.printStackTrace(System.err);
 		}
-		
-		
-	
 	
 		response.setContentType("text/html");
 		response.setStatus(200); 
