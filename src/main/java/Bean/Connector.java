@@ -41,6 +41,7 @@ public class Connector {
 	
 	public Connector(){
 		set_credentials();
+		object_storage_connection();
 	}
 	
 	private void set_credentials(){
