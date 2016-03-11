@@ -15,16 +15,19 @@ import com.ibm.watson.developer_cloud.language_translation.v2.model.TranslationR
 import com.ibm.watson.developer_cloud.text_to_speech.v1.TextToSpeech;
 import com.ibm.watson.developer_cloud.text_to_speech.v1.model.Voice;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
+
+import org.openstack4j.model.common.Payload;
+import org.openstack4j.model.common.Payloads;
 
 @WebServlet(name = "PServlet", urlPatterns = {"/PServlet"})
 public class PServlet extends HttpServlet {
-	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
 	
-		Connector conn = new Connector();
+	protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
+		response.setContentType("text/html;charset=UTF-8");
+	try (PrintWriter out = response.getWriter()) {	
+		HttpSession session = request.getSession();
+		Connector conn = (Connector) session.getAttribute("connector");
 
 		LanguageTranslation service = new LanguageTranslation();
 		service.setUsernameAndPassword(conn.get_language_username(),conn.get_language_password());
@@ -48,6 +51,7 @@ public class PServlet extends HttpServlet {
 			}
 			String format = "audio/wav";
 			InputStream speech = service1.synthesize(translation, Voice.ES_ENRIQUE, format);
+			/*
 			OutputStream output = response.getOutputStream();
 			byte[] buf = new byte[2046];
 			int len;
@@ -58,15 +62,40 @@ public class PServlet extends HttpServlet {
 			response.setHeader("Content-disposition","attachment;filename=output.wav");
 			output.flush();
 			output.close();
-			
+			*/
+			Payload upfile = Payloads.create(speech);
+			if (!(upfile == null)){
+				conn.uploadFile("sample","output["+translation+"].wav",upfile);
+			}
+			speech.close();
+			session.setAttribute("connector", conn);
 		}catch(Exception e){
 			e.printStackTrace(System.err);
 		}
 	
-		response.setContentType("text/html");
-		response.setStatus(200); 
- 		request.getRequestDispatcher("index.jsp").forward(request,response); 
+		response.sendRedirect("index.jsp");
+	}
 	}
 	
+	@Override 
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+             throws ServletException, IOException { 
+         processRequest(request, response); 
+    } 
+
+	@Override 
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+             throws ServletException, IOException { 
+         processRequest(request, response); 
+    } 
+	
+	@Override 
+    public String getServletInfo() { 
+         return "Short description"; 
+    } 
+
+
+ 
+
 	
 }
