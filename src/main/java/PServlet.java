@@ -16,6 +16,8 @@ import com.ibm.watson.developer_cloud.text_to_speech.v1.TextToSpeech;
 import com.ibm.watson.developer_cloud.text_to_speech.v1.model.Voice;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 @WebServlet(name = "PServlet", urlPatterns = {"/PServlet"})
 public class PServlet extends HttpServlet {
@@ -32,10 +34,31 @@ public class PServlet extends HttpServlet {
 		
 		TranslationResult result = service.translate((String) request.getParameter("input"),"en","es");
 		
+		String translation = null;
+		
 		try{
 			JSONParser parser = new JSONParser();
 			JSONObject object = (JSONObject) parser.parse(result.toString());
-			request.setAttribute("result",result.toString());
+			
+			JSONArray translations = (JSONArray) object.get("translations");
+			for (Object o : translations){
+				JSONObject a = (JSONObject) o;
+				translation = (String) a.get("translation");
+				break;
+			}
+			String format = "audio/wav";
+			InputStream speech = service1.synthesize(translation, Voice.ES_ENRIQUE, format);
+			OutputStream output = response.getOutputStream();
+			byte[] buf = new byte[2046];
+			int len;
+			while ((len = speech.read(buf)) > 0){
+				output.write(buf,0,len);
+			}
+			response.setContentType("audio/wav");
+			response.setHeader("Content-disposition","attachment;filename=output.wav");
+			output.flush();
+			output.close();
+			
 		}catch(Exception e){
 			e.printStackTrace(System.err);
 		}
