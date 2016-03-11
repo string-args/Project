@@ -5,6 +5,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse; 
 import javax.servlet.http.HttpSession; 
 
+import org.json.simple.JSONArray; 
+import org.json.simple.JSONObject; 
+import org.json.simple.parser.JSONParser; 
+
 import java.io.IOException;
 
 import com.ibm.watson.developer_cloud.language_translation.v2.LanguageTranslation;
@@ -18,7 +22,15 @@ public class PServlet extends HttpServlet {
 		LanguageTranslation service = new LanguageTranslation();
 		service.setUsernameAndPassword(conn.get_language_username(),conn.get_language_password());
 		TranslationResult result = service.translate(request.getParameter("input"),"en","es");
-		request.setAttribute("result",result.toString());
+		
+		try{
+			JSONParser parser = new JSONParser();
+			JSONObject res = (JSONObject) parser.parse(result.toString());
+			JSONObject res_obj = (JSONObject) ((JSONArray) res.get("translations")).get(0);
+			request.setAttribute("result",res_obj.toString());
+		} catch (Exception e){
+			e.printStackTrace(System.err);
+		}
 		response.setContentType("text/html"); 
 		response.setStatus(200); 
  		request.getRequestDispatcher("index.jsp").forward(request,response); 
