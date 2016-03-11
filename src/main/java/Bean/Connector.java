@@ -8,13 +8,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject; 
 import org.json.simple.parser.JSONParser; 
 
-import org.openstack4j.api.OSClient; 
-import org.openstack4j.model.storage.object.SwiftAccount; 
-import org.openstack4j.model.storage.object.SwiftObject; 
-import org.openstack4j.model.common.Identifier; 
-import org.openstack4j.model.common.Payload; 
-import org.openstack4j.openstack.OSFactory; 
-
 
 public class Connector {
     
@@ -23,7 +16,7 @@ public class Connector {
 	
 	private String t2s_username;
 	private String t2s_password;
-	
+	/*
 	private String auth_url = ""; 
     private String project = ""; 
     private String projectId = ""; 
@@ -37,11 +30,11 @@ public class Connector {
     private Identifier projectIdent = null; 
     private OSClient os = null; 
  	private SwiftAccount account = null; 
-
+	*/
 	
 	public Connector(){
 		set_credentials();
-		object_storage_connection();
+		//object_storage_connection();
 	}
 	
 	private void set_credentials(){
@@ -84,6 +77,7 @@ public class Connector {
 		}
 	}
 	
+	/*
 	private void object_storage_connection(){
 		try{
 			 String envApp = System.getenv("VCAP_APPLICATION"); 
@@ -150,7 +144,7 @@ public class Connector {
 	public List listAllObjects(String containerName) { 
          return os.objectStorage().objects().list(containerName); 
     } 
-
+	*/
 
 	
 	public String get_language_username(){

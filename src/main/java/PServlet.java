@@ -19,8 +19,6 @@ import com.ibm.watson.developer_cloud.language_translation.v2.model.TranslationR
 import com.ibm.watson.developer_cloud.text_to_speech.v1.TextToSpeech;
 import com.ibm.watson.developer_cloud.text_to_speech.v1.model.Voice;
 
-import org.openstack4j.model.common.Payload; 
-import org.openstack4j.model.common.Payloads; 
 
 @WebServlet(name = "PServlet", urlPatterns = {"/PServlet"})
 public class PServlet extends HttpServlet {
@@ -36,9 +34,6 @@ public class PServlet extends HttpServlet {
 		service1.setUsernameAndPassword(conn.get_t2s_username(),conn.get_t2s_password());
 		
 		String translate = null;
-
-		Payload upfile = null;
-		
 		try{
 			JSONParser parser = new JSONParser();
 			JSONObject a = (JSONObject) parser.parse(result.toString());
@@ -54,7 +49,7 @@ public class PServlet extends HttpServlet {
 			String outputformat = "audio/wav";
 			InputStream speech = service1.synthesize(translate,Voice.ES_ENRIQUE,outputformat);
 			
-			/*OutputStream output = response.getOutputStream();
+			OutputStream output = response.getOutputStream();
 			byte[] buf = new byte[2046];
 			int len;
 			while ((len = speech.read(buf)) > 0){
@@ -62,11 +57,15 @@ public class PServlet extends HttpServlet {
 			}
 
 			OutputStream os = output;
-			*/
-			upfile = Payloads.create(speech);
-			if (!(upfile == null)){
-				conn.uploadFile("sample", "output["+translate+"].wav", upfile);
-			}
+			os.flush();
+			os.close();
+			
+			response.setContentType("audio/wav");
+			response.setHeader("Content-disposition","filename="+translate+".wav");
+			//upfile = Payloads.create(speech);
+			//if (!(upfile == null)){
+			//	conn.uploadFile("sample", "output["+translate+"].wav", upfile);
+			//}
 			//os.flush();
 			//os.close();
 		} catch (Exception e){
