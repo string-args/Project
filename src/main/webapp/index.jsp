@@ -1,7 +1,7 @@
  
 <%@page import="java.util.List"%> 
 <%@page import="org.openstack4j.model.storage.object.SwiftObject"%> 
-<%@page import="Bean.ObjectStorageConnector" %>
+<%@page import="Bean.Connector" %>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
