@@ -32,7 +32,7 @@ public class PServlet extends HttpServlet {
 				JSONObject p = (JSONObject) c;
 				
 				String translate = (String) p.get("translation");		
-				request.setAttribute("result",o.toString());
+				request.setAttribute("result",translate);
 			}
 
 		} catch (Exception e){
