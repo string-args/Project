@@ -25,15 +25,10 @@ public class PServlet extends HttpServlet {
 		
 		try{
 			JSONParser parser = new JSONParser();
-			JSONObject res = (JSONObject) parser.parse(result.toString());
-			JSONObject res_obj = (JSONObject) ((JSONArray) res.get("translations")).get(0);
-			JSONObject creds = (JSONObject) res_obj.get("translation");
-			String translate = (String) creds.get("translation");
-			//JSONObject trans = (JSONObject) res_obj.get("translation").get(0);
-			
-			
-			//JSONObject parse_result = (JSONObject) ((JSONArray) res_obj.get("translation")).get(0);
-			request.setAttribute("result",translate);
+			JSONObject a = (JSONObject) parser.parse(result.toString());
+			JSONArray o = (JSONArray) a.get("translations");
+		
+			request.setAttribute("result",o.toString());
 		} catch (Exception e){
 			e.printStackTrace(System.err);
 		}
