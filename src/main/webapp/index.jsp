@@ -20,7 +20,7 @@
 			if (conn.listAllObjects("sample").isEmpty()){
 				conn.createContainer("sample");
 			} else {
-				List<SwiftObject> objectlist = connect.listAllObjects("sample");	
+				List<? extends SwiftObject> objectlist = conn.listAllObjects("sample");	
 				for (int i = 0; i < objectlist.size(); i++) { 
  					out.println("<tr>"); 
  					out.println("<td><label for=\"filename\">"+ objectlist.get(i).getName() +"</label></td>"); 
