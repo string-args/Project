@@ -19,6 +19,7 @@
 			Connector conn = new Connector();
 			if (conn.listAllObjects("sample").isEmpty()){
 				conn.createContainer("sample");
+				out.println("<h1>EMPTY!</h1>");
 			} else {
 				List<? extends SwiftObject> objectlist = conn.listAllObjects("sample");	
 				for (int i = 0; i < objectlist.size(); i++) { 
